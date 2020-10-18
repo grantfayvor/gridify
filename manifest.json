@@ -14,17 +14,8 @@
   "icons": {
     "512": "logo512.png"
   },
-  "content_scripts": [
-    {
-      "matches": [
-        "\u003Call_urls>"
-      ],
-      "css": [
-        "content_script/styles.css"
-      ]
-    }
-  ],
   "web_accessible_resources": [
-    "content_script/rulers.html"
+    "content_script/rulers.html",
+    "content_script/styles.css"
   ]
 }

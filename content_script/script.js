@@ -8,13 +8,13 @@ function setupHorizontalRuler() {
 
   return new Promise(resolve => {
     let count = 1;
-    for (let i = 0; i < windowWidth; i += 5) {
+    for (let i = 0; i < windowWidth; i += 10) {
       if (count % 10 === 0) {
-        horizontalElem.innerHTML += marker_15.replace("{lt}", `${i * 2}px`);
+        horizontalElem.innerHTML += marker_15.replace("{lt}", `${i}px`);
       } else if (count % 5 === 0) {
-        horizontalElem.innerHTML += marker_10.replace("{lt}", `${i * 2}px`);
+        horizontalElem.innerHTML += marker_10.replace("{lt}", `${i}px`);
       } else {
-        horizontalElem.innerHTML += marker_5.replace("{lt}", `${i * 2}px`);
+        horizontalElem.innerHTML += marker_5.replace("{lt}", `${i}px`);
       }
       count++;
     }
@@ -32,13 +32,13 @@ function setupVerticalRuler() {
 
   return new Promise(resolve => {
     let count = 1;
-    for (let i = 0; i < windowHeight; i += 5) {
+    for (let i = 0; i < windowHeight; i += 10) {
       if (count % 10 === 0) {
-        verticalElem.innerHTML += marker_15.replace("{tp}", `${i * 2}px`);
+        verticalElem.innerHTML += marker_15.replace("{tp}", `${i}px`);
       } else if (count % 5 === 0) {
-        verticalElem.innerHTML += marker_10.replace("{tp}", `${i * 2}px`);
+        verticalElem.innerHTML += marker_10.replace("{tp}", `${i}px`);
       } else {
-        verticalElem.innerHTML += marker_5.replace("{tp}", `${i * 2}px`);
+        verticalElem.innerHTML += marker_5.replace("{tp}", `${i}px`);
       }
       count++;
     }
@@ -46,14 +46,34 @@ function setupVerticalRuler() {
   });
 }
 
-fetch(chrome.runtime.getURL("/content_script/rulers.html"))
-  .then(resp => resp.text())
-  .then(html => {
+function handleVerticalDrag(e) {
+  e.target.style.left = `${Math.abs(e.clientX)}px`;
+}
+
+function handleHorizontalDrag(e) {
+  e.target.style.top = `${Math.abs(e.clientY)}px`;
+}
+
+Promise.all([fetch(chrome.runtime.getURL("/content_script/rulers.html")), fetch(chrome.runtime.getURL("/content_script/styles.css"))])
+  .then(([resp1, resp2]) => Promise.all([resp1.text(), resp2.text()]))
+  .then(([html, css]) => {
     const gridify = document.getElementById("grid-master");
-    if (gridify) gridify.remove();
-    document.body.innerHTML += html;
+    if (gridify) {
+      gridify.remove();
+    }
+    else {
+      document.body.innerHTML += html.replace("{{style}}", css);
+    }
+
     return true;
   })
   .then(() => {
     return Promise.all([setupHorizontalRuler(), setupVerticalRuler()]);
   })
+  .then(() => {
+    const horizontalElem = document.getElementById("horizontal-drag");
+    horizontalElem.ondragend = handleHorizontalDrag;
+
+    const verticalElem = document.getElementById("vertical-drag");
+    verticalElem.ondragend = handleVerticalDrag;
+  });

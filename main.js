@@ -4,6 +4,6 @@ chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     {
       file: 'content_script/script.js'
     }, () => {
-      // window.close();
+      window.close();
     });
 });

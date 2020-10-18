@@ -5,7 +5,7 @@
   width: 100%;
   background: #FFFFFF;
   border-bottom: 1px solid #000000;
-  z-index: 999999999999999;
+  z-index: 99999999999;
   border-left: 15px solid #FFFFFF;
 }
 
@@ -62,4 +62,25 @@
 
 .vertical__markers.w15 {
   width: 15px;
+}
+
+.horizontal__drag {
+  position: fixed;
+  top: 0px;
+  width: 100vw;
+  border-bottom: 1px solid #000000;
+  cursor: n-resize;
+  z-index: 999999999999999999999999999;
+  padding-top: 15px;
+}
+
+.vertical__drag {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  height: 100vh;
+  border-right: 1px solid #000000;
+  cursor: w-resize;
+  z-index: 999999999999999999999999999;
+  padding-left: 15px;
 }
