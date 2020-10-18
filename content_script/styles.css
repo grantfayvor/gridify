@@ -1,0 +1,65 @@
+.main__horizontal {
+  position: fixed;
+  top: 0px;
+  height: 15px;
+  width: 100%;
+  background: #FFFFFF;
+  border-bottom: 1px solid #000000;
+  z-index: 999999999999999;
+  border-left: 15px solid #FFFFFF;
+}
+
+.main__vertical {
+  position: fixed;
+  left: 0px;
+  top: 15px;
+  width: 15px;
+  height: 100vh;
+  background: #FFFFFF;
+  border-right: 1px solid #000000;
+  z-index: 99999999999;
+}
+
+.horizontal__markers {
+  position: absolute;
+  width: 1px;
+  top: 0px;
+  background: #000000;
+  z-index: 999999999999999;
+}
+
+.horizontal__markers.h5 {
+  height: 5px;
+  top: 9px;
+}
+
+.horizontal__markers.h10 {
+  height: 10px;
+  top: 4px;
+}
+
+.horizontal__markers.h15 {
+  height: 15px;
+}
+
+.vertical__markers {
+  position: absolute;
+  height: 1px;
+  left: 0px;
+  background: #000000;
+  z-index: 999999999999999;
+}
+
+.vertical__markers.w5 {
+  width: 5px;
+  left: 9px;
+}
+
+.vertical__markers.w10 {
+  width: 10px;
+  left: 4px;
+}
+
+.vertical__markers.w15 {
+  width: 15px;
+}

@@ -1,0 +1,30 @@
+{
+  "name": "Gridify",
+  "version": "1.0.0",
+  "manifest_version": 2,
+  "description": "Show grid lines directly on any web page and also calculate pixel distances between elements.",
+  "browser_action": {
+    "default_icon": "logo512.png",
+    "default_popup": "index.html"
+  },
+  "permissions": [
+    "*://*/*", 
+    "activeTab"
+  ],
+  "icons": {
+    "512": "logo512.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "\u003Call_urls>"
+      ],
+      "css": [
+        "content_script/styles.css"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    "content_script/rulers.html"
+  ]
+}
