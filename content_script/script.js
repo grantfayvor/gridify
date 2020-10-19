@@ -77,12 +77,13 @@ Promise.all([fetch(chrome.runtime.getURL("/content_script/rulers.html")), fetch(
     const gridify = document.getElementById("grid-master");
     if (gridify) {
       gridify.remove();
-    }
-    else {
-      document.body.innerHTML += html.replace("{{style}}", css);
+      throw new Error("Cancel gridify..............");
     }
 
-    return true;
+    document.body.innerHTML += html.replace("{{style}}", css);
+  })
+  .catch(err => {
+    console.error(err);
   })
   .then(() => {
     return Promise.all([setupHorizontalRuler(), setupVerticalRuler()]);
@@ -119,12 +120,18 @@ Promise.all([fetch(chrome.runtime.getURL("/content_script/rulers.html")), fetch(
         ctx.clearRect(0, 0, canvas.width, canvas.height); //clear canvas
         ctx.beginPath();
         ctx.moveTo(last_mousex, last_mousey);
+        ctx.lineTo(last_mousex, mousey);
+        const yDiff = mousey - last_mousey;
+        const absYDiff = Math.abs(yDiff);
+        ctx.fillText(absYDiff, last_mousex - (`${absYDiff}`.length * 10), (last_mousey + (yDiff / 2)));
         ctx.lineTo(mousex, mousey);
+        const xDiff = mousex - last_mousex;
+        const absXDiff = Math.abs(xDiff);
+        ctx.fillText(absXDiff, (last_mousex + (xDiff / 2)), mousey - 10);
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 1;
         ctx.lineJoin = ctx.lineCap = 'round';
         ctx.stroke();
       }
     };
-
-  })
+  });
