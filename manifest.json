@@ -9,8 +9,16 @@
   },
   "permissions": [
     "*://*/*", 
-    "activeTab"
+    "activeTab",
+    "contextMenus",
+    "tabs"
   ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": false
+  },
   "icons": {
     "512": "logo512.png"
   },

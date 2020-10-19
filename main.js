@@ -4,6 +4,15 @@ chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     {
       file: 'content_script/script.js'
     }, () => {
-      window.close();
+      chrome.contextMenus.removeAll(() => {
+        chrome.contextMenus.create({
+          "id": "gridify_1234",
+          "title": "Select Element Position",
+          "type": "normal",
+          "contexts": ["all"]
+        }, () => {
+          window.close();
+        });
+      });
     });
 });
