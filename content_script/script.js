@@ -1,4 +1,4 @@
-var canvas, ctx;
+var canvas, ctx, startElem;
 var canvasx = canvasy = last_mousex = last_mousey = mousex = mousey = 0;
 var mousedown = false;
 
@@ -103,35 +103,67 @@ Promise.all([fetch(chrome.runtime.getURL("/content_script/rulers.html")), fetch(
     canvasy = canvas.offsetTop;
     canvas.width = windowWidth - canvasx;
     canvas.height = windowHeight - canvasy;
-    last_mousex = last_mousey = 0;
-    mousex = mousey = 0;
 
     document.body.oncontextmenu = function (e) {
       last_mousex = parseInt(e.clientX - canvasx);
       last_mousey = parseInt(e.clientY - canvasy);
       mousedown = false;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (startElem) {
+        startElem.classList.remove("gridify__border");
+      }
+
+      [, startElem] = document.elementsFromPoint(last_mousex, last_mousey);
+      startElem.classList.add("gridify__border");
     };
 
     canvas.onmousemove = function (e) {
-      mousex = parseInt(e.clientX - canvasx);
-      mousey = parseInt(e.clientY - canvasy);
       if (mousedown) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height); //clear canvas
+        mousex = parseInt(e.clientX - canvasx);
+        mousey = parseInt(e.clientY - canvasy);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.beginPath();
         ctx.moveTo(last_mousex, last_mousey);
         ctx.lineTo(last_mousex, mousey);
+        ctx.textBaseline = "middle";
+        ctx.font = "bold 10pt Sans Serif"
         const yDiff = mousey - last_mousey;
         const absYDiff = Math.abs(yDiff);
+        const yTextSize = ctx.measureText(absYDiff);
+        ctx.fillStyle = "#F35E3C";
+        ctx.fillRect(last_mousex - (`${absYDiff}`.length * 10) - 3, (last_mousey + (yDiff / 2) - 5), yTextSize.width + 6, 15);
+        ctx.fillStyle = "#FFFFFF";
         ctx.fillText(absYDiff, last_mousex - (`${absYDiff}`.length * 10), (last_mousey + (yDiff / 2)));
         ctx.lineTo(mousex, mousey);
         const xDiff = mousex - last_mousex;
         const absXDiff = Math.abs(xDiff);
+        const xTextSize = ctx.measureText(absXDiff);
+        ctx.fillStyle = "#F35E3C";
+        ctx.fillRect((last_mousex + (xDiff / 2) - 3), mousey - 15, xTextSize.width + 6, 15);
+        ctx.fillStyle = "#FFFFFF";
         ctx.fillText(absXDiff, (last_mousex + (xDiff / 2)), mousey - 10);
-        ctx.strokeStyle = 'black';
+        ctx.strokeStyle = '#F35E3C';
         ctx.lineWidth = 1;
         ctx.lineJoin = ctx.lineCap = 'round';
         ctx.stroke();
       }
     };
+
+    function getRecalcPosition({ lastXPosition, xPosition, lastYPosition, yPosition }) {
+      const elemPosition = startElem.getBoundingClientRect();
+      if (lastXPosition > xPosition) {
+        lastXPosition = parseInt(elemPosition.left);
+      } else {
+        lastXPosition = parseInt(elemPosition.right);
+      }
+
+      if (lastYPosition > yPosition) {
+        lastYPosition = parseInt(elemPosition.top);
+      } else {
+        lastYPosition = parseInt(elemPosition.bottom);
+      }
+
+      return { lastXPosition, xPosition, lastYPosition, yPosition };
+    }
   });
