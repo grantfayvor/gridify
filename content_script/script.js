@@ -1,21 +1,38 @@
-var canvas, ctx, startElem;
+var canvas, ctx, startElem, defaultBodyClick;
 var canvasx = canvasy = last_mousex = last_mousey = mousex = mousey = 0;
 var mousedown = false;
 
 var windowWidth = window.innerWidth;
 var windowHeight = window.innerHeight;
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   switch (message.type) {
-    case "PICK_POSITION":
-      mousedown = true;
-      canvas.style.cursor = 'crosshair';
+    case "TOGGLE_GRIDS_VISIBILITY":
+      await Promise.all([toggleHorizontalGrids(), toggleVerticalGrids()]);
       break;
     default:
       console.log("nothing to do.");
   }
   return true;
 });
+
+function toggleHorizontalGrids() {
+  return new Promise(resolve => {
+    Array.from(document.getElementsByClassName("horizontal__drag")).forEach(element => {
+      element.classList.toggle("hidden");
+    });
+    resolve(true);
+  });
+}
+
+function toggleVerticalGrids() {
+  return new Promise(resolve => {
+    Array.from(document.getElementsByClassName("vertical__drag")).forEach(element => {
+      element.classList.toggle("hidden");
+    });
+    resolve(true);
+  });
+}
 
 function setupHorizontalRuler() {
   const marker_5 = "<div style='left:{lt};' class='horizontal__markers h5'></div>";
@@ -63,12 +80,58 @@ function setupVerticalRuler() {
   });
 }
 
-function handleVerticalDrag(e) {
-  e.target.style.left = `${Math.abs(e.clientX)}px`;
+function setupHorizontalEvents() {
+  return new Promise(resolve => {
+    Array.from(document.getElementsByClassName("horizontal__drag")).forEach(element => {
+      element.ondragend = handleHorizontalDrag;
+      element.onkeydown = handleKeydown;
+    });
+    resolve(true);
+  });
 }
 
-function handleHorizontalDrag(e) {
+function setupVerticalEvents() {
+  return new Promise(resolve => {
+    Array.from(document.getElementsByClassName("vertical__drag")).forEach(element => {
+      element.ondragend = handleVerticalDrag;
+      element.onkeydown = handleKeydown;
+    });
+    resolve(true);
+  });
+}
+
+function handleKeydown(e) {
+  debugger;
+  const key = e.key;
+  if (key === "Backspace" || key === "Delete") {
+    e.target.remove();
+  }
+}
+
+async function handleVerticalDrag(e) {
+  debugger;
+  e.target.style.left = `${Math.abs(e.clientX)}px`;
+
+  if (!e.target.hasAttribute("data-moved")) {
+    e.target.setAttribute("data-moved", true);
+    const elemStr = `<div tabindex="-1" draggable="true" class="vertical__drag"><hr /></div>`;
+    document.getElementById("grid-master").innerHTML += elemStr;
+    await Promise.all([setupHorizontalEvents(), setupVerticalEvents()])
+      .then(() => e.target.focus());
+  }
+}
+
+async function handleHorizontalDrag(e) {
+  debugger;
   e.target.style.top = `${Math.abs(e.clientY)}px`;
+
+  if (!e.target.hasAttribute("data-moved")) {
+    e.target.setAttribute("data-moved", true);
+    const elemStr = `<div tabindex="-1" draggable="true" class="horizontal__drag"><hr /></div>`;
+    document.getElementById("grid-master").innerHTML += elemStr;
+    await Promise.all([setupHorizontalEvents(), setupVerticalEvents()])
+    .then(() => e.target.focus());
+  }
 }
 
 Promise.all([fetch(chrome.runtime.getURL("/content_script/rulers.html")), fetch(chrome.runtime.getURL("/content_script/styles.css"))])
@@ -77,6 +140,7 @@ Promise.all([fetch(chrome.runtime.getURL("/content_script/rulers.html")), fetch(
     const gridify = document.getElementById("grid-master");
     if (gridify) {
       gridify.remove();
+      document.body.onclick = defaultBodyClick;
       throw new Error("Cancel gridify..............");
     }
 
@@ -89,11 +153,13 @@ Promise.all([fetch(chrome.runtime.getURL("/content_script/rulers.html")), fetch(
     return Promise.all([setupHorizontalRuler(), setupVerticalRuler()]);
   })
   .then(() => {
-    const horizontalElem = document.getElementById("horizontal-drag");
+    const horizontalElem = document.getElementById("horizontal-drag--0");
     horizontalElem.ondragend = handleHorizontalDrag;
+    horizontalElem.onkeydown = handleKeydown;
 
-    const verticalElem = document.getElementById("vertical-drag");
+    const verticalElem = document.getElementById("vertical-drag--0");
     verticalElem.ondragend = handleVerticalDrag;
+    verticalElem.onkeydown = handleKeydown;
   })
   .then(() => {
     canvas = document.getElementById("main-canvas");
@@ -104,10 +170,13 @@ Promise.all([fetch(chrome.runtime.getURL("/content_script/rulers.html")), fetch(
     canvas.width = windowWidth - canvasx;
     canvas.height = windowHeight - canvasy;
 
-    document.body.oncontextmenu = function (e) {
+    defaultBodyClick = document.body.onclick;
+    document.body.onclick = function (e) {
+      e.preventDefault();
       last_mousex = parseInt(e.clientX - canvasx);
       last_mousey = parseInt(e.clientY - canvasy);
-      mousedown = false;
+      mousedown = true;
+      canvas.style.cursor = 'crosshair';
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (startElem) {

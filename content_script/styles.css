@@ -74,6 +74,10 @@
   z-index: 999999999999999999999999999;
 }
 
+.horizontal__drag:focus {
+  outline: none;
+}
+
 .horizontal__drag>hr {
   background: #F35E3C;
   width: 100%;
@@ -92,6 +96,10 @@
   z-index: 999999999999999999999999999;
 }
 
+.vertical__drag:focus {
+  outline: none;
+}
+
 .vertical__drag>hr {
   background: #F35E3C;
   height: 100%;
@@ -108,4 +116,8 @@
 
 .gridify__border {
   border: 1px solid #F35E3C!important;
+}
+
+.hidden {
+  display: none;
 }

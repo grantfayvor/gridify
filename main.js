@@ -7,7 +7,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       chrome.contextMenus.removeAll(() => {
         chrome.contextMenus.create({
           "id": "gridify_1234",
-          "title": "Select Element Position",
+          "title": "Toggle Grid Visibility",
           "type": "normal",
           "contexts": ["all"]
         }, () => {
