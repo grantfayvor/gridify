@@ -1,10 +1,10 @@
 {
-  "name": "Gridify",
+  "name": "Hex-Grid",
   "version": "1.0.0",
   "manifest_version": 2,
   "description": "Show grid lines directly on any web page and also calculate pixel distances between elements.",
   "browser_action": {
-    "default_icon": "logo512.png",
+    "default_icon": "images/horus_logo.png",
     "default_popup": "index.html"
   },
   "permissions": [
@@ -20,7 +20,12 @@
     "persistent": false
   },
   "icons": {
-    "512": "logo512.png"
+    "16": "images/horus_logo.png",
+    "32": "images/horus_logo.png",
+    "48": "images/horus_logo.png",
+    "128": "images/horus_logo.png",
+    "256": "images/horus_logo.png",
+    "512": "images/horus_logo.png"
   },
   "web_accessible_resources": [
     "content_script/rulers.html",
