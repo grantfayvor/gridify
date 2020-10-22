@@ -101,7 +101,6 @@ function setupVerticalEvents() {
 }
 
 function handleKeydown(e) {
-  debugger;
   const key = e.key;
   if (key === "Backspace" || key === "Delete") {
     e.target.remove();
@@ -109,7 +108,6 @@ function handleKeydown(e) {
 }
 
 async function handleVerticalDrag(e) {
-  debugger;
   e.target.style.left = `${Math.abs(e.clientX)}px`;
 
   if (!e.target.hasAttribute("data-moved")) {
@@ -122,7 +120,6 @@ async function handleVerticalDrag(e) {
 }
 
 async function handleHorizontalDrag(e) {
-  debugger;
   e.target.style.top = `${Math.abs(e.clientY)}px`;
 
   if (!e.target.hasAttribute("data-moved")) {
