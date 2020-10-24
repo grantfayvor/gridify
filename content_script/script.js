@@ -41,20 +41,30 @@ function setupHorizontalRuler() {
 
   const horizontalElem = document.getElementById("main-horizontal");
 
-  return new Promise(resolve => {
-    let count = 1;
-    for (let i = 0; i < windowWidth; i += 10) {
-      if (count % 10 === 0) {
-        horizontalElem.innerHTML += marker_15.replace("{lt}", `${i}px`);
-      } else if (count % 5 === 0) {
-        horizontalElem.innerHTML += marker_10.replace("{lt}", `${i}px`);
-      } else {
-        horizontalElem.innerHTML += marker_5.replace("{lt}", `${i}px`);
+  const runner = (start, end) => {
+    return new Promise(resolve => {
+      let count = 1;
+      for (; start < end; start += 10) {
+        if (count % 10 === 0) {
+          horizontalElem.innerHTML += marker_15.replace("{lt}", `${start}px`);
+        } else if (count % 5 === 0) {
+          horizontalElem.innerHTML += marker_10.replace("{lt}", `${start}px`);
+        } else {
+          horizontalElem.innerHTML += marker_5.replace("{lt}", `${start}px`);
+        }
+        count++;
       }
-      count++;
+      return resolve(true);
+    })
+  };
+
+  return new Promise(resolve => {
+    const tasks = [];
+    for (let i = 0; i < windowWidth; i += 100) {
+      tasks.push(runner(i, windowWidth - i < 100 ? windowWidth + 10 : i + 100));
     }
-    return resolve(true);
-  });
+    return resolve(tasks);
+  }).then(tasks => Promise.all(tasks));
 }
 
 function setupVerticalRuler() {
@@ -64,20 +74,30 @@ function setupVerticalRuler() {
 
   const verticalElem = document.getElementById("main-vertical");
 
-  return new Promise(resolve => {
-    let count = 1;
-    for (let i = 0; i < windowHeight; i += 10) {
-      if (count % 10 === 0) {
-        verticalElem.innerHTML += marker_15.replace("{tp}", `${i}px`);
-      } else if (count % 5 === 0) {
-        verticalElem.innerHTML += marker_10.replace("{tp}", `${i}px`);
-      } else {
-        verticalElem.innerHTML += marker_5.replace("{tp}", `${i}px`);
+  const runner = (start, end) => {
+    return new Promise(resolve => {
+      let count = 1;
+      for (; start < end; start += 10) {
+        if (count % 10 === 0) {
+          verticalElem.innerHTML += marker_15.replace("{tp}", `${start}px`);
+        } else if (count % 5 === 0) {
+          verticalElem.innerHTML += marker_10.replace("{tp}", `${start}px`);
+        } else {
+          verticalElem.innerHTML += marker_5.replace("{tp}", `${start}px`);
+        }
+        count++;
       }
-      count++;
+      return resolve(true);
+    })
+  };
+
+  return new Promise(resolve => {
+    const tasks = [];
+    for (let i = 0; i < windowHeight; i += 100) {
+      tasks.push(runner(i, windowHeight - i < 100 ? windowHeight + 10 : i + 100));
     }
-    return resolve(true);
-  });
+    return resolve(tasks);
+  }).then(tasks => Promise.all(tasks));
 }
 
 function setupHorizontalEvents() {
@@ -127,7 +147,7 @@ async function handleHorizontalDrag(e) {
     const elemStr = `<div tabindex="-1" draggable="true" class="horizontal__drag"><hr /></div>`;
     document.getElementById("grid-master").innerHTML += elemStr;
     await Promise.all([setupHorizontalEvents(), setupVerticalEvents()])
-    .then(() => e.target.focus());
+      .then(() => e.target.focus());
   }
 }
 
