@@ -132,8 +132,12 @@ async function handleVerticalDrag(e) {
 
   if (!e.target.hasAttribute("data-moved")) {
     e.target.setAttribute("data-moved", true);
-    const elemStr = `<div tabindex="-1" draggable="true" class="vertical__drag"><hr /></div>`;
-    document.getElementById("grid-master").innerHTML += elemStr;
+    const element = document.createElement("div");
+    element.tabIndex = -1;
+    element.draggable = true;
+    element.classList.add("vertical__drag");
+    element.appendChild(document.createElement("hr"));
+    document.getElementById("grid-master").appendChild(element);
     await Promise.all([setupHorizontalEvents(), setupVerticalEvents()])
       .then(() => e.target.focus());
   }
@@ -144,11 +148,49 @@ async function handleHorizontalDrag(e) {
 
   if (!e.target.hasAttribute("data-moved")) {
     e.target.setAttribute("data-moved", true);
-    const elemStr = `<div tabindex="-1" draggable="true" class="horizontal__drag"><hr /></div>`;
-    document.getElementById("grid-master").innerHTML += elemStr;
+    const element = document.createElement("div");
+    element.tabIndex = -1;
+    element.draggable = true;
+    element.classList.add("horizontal__drag");
+    element.appendChild(document.createElement("hr"));
+    document.getElementById("grid-master").appendChild(element);
     await Promise.all([setupHorizontalEvents(), setupVerticalEvents()])
       .then(() => e.target.focus());
   }
+}
+
+function setupCanvasMoveEvent({ canvas, ctx, canvasx, canvasy }) {
+  canvas.onmousemove = function (e) {
+    if (mousedown) {
+      mousex = parseInt(e.clientX - canvasx);
+      mousey = parseInt(e.clientY - canvasy);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.moveTo(last_mousex, last_mousey);
+      ctx.lineTo(last_mousex, mousey);
+      ctx.textBaseline = "middle";
+      ctx.font = "bold 10pt Sans Serif"
+      const yDiff = mousey - last_mousey;
+      const absYDiff = Math.abs(yDiff);
+      const yTextSize = ctx.measureText(absYDiff);
+      ctx.fillStyle = "#F35E3C";
+      ctx.fillRect(last_mousex - (`${absYDiff}`.length * 10) - 3, (last_mousey + (yDiff / 2) - 5), yTextSize.width + 6, 15);
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillText(absYDiff, last_mousex - (`${absYDiff}`.length * 10), (last_mousey + (yDiff / 2)));
+      ctx.lineTo(mousex, mousey);
+      const xDiff = mousex - last_mousex;
+      const absXDiff = Math.abs(xDiff);
+      const xTextSize = ctx.measureText(absXDiff);
+      ctx.fillStyle = "#F35E3C";
+      ctx.fillRect((last_mousex + (xDiff / 2) - 3), mousey - 15, xTextSize.width + 6, 15);
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillText(absXDiff, (last_mousex + (xDiff / 2)), mousey - 10);
+      ctx.strokeStyle = '#F35E3C';
+      ctx.lineWidth = 1;
+      ctx.lineJoin = ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+  };
 }
 
 Promise.all([fetch(chrome.runtime.getURL("/content_script/rulers.html")), fetch(chrome.runtime.getURL("/content_script/styles.css"))])
@@ -158,13 +200,10 @@ Promise.all([fetch(chrome.runtime.getURL("/content_script/rulers.html")), fetch(
     if (gridify) {
       gridify.remove();
       document.body.onclick = defaultBodyClick;
-      throw new Error("Cancel gridify..............");
+      return Promise.reject("Close Hex-grid..............");
     }
 
     document.body.innerHTML += html.replace("{{style}}", css);
-  })
-  .catch(err => {
-    console.error(err);
   })
   .then(() => {
     return Promise.all([setupHorizontalRuler(), setupVerticalRuler()]);
@@ -190,6 +229,11 @@ Promise.all([fetch(chrome.runtime.getURL("/content_script/rulers.html")), fetch(
     defaultBodyClick = document.body.onclick;
     document.body.onclick = function (e) {
       e.preventDefault();
+      if (mousedown) {
+        mousedown = false;
+        canvas.style.cursor = 'default';
+        return;
+      }
       last_mousex = parseInt(e.clientX - canvasx);
       last_mousey = parseInt(e.clientY - canvasy);
       mousedown = true;
@@ -204,52 +248,28 @@ Promise.all([fetch(chrome.runtime.getURL("/content_script/rulers.html")), fetch(
       startElem.classList.add("gridify__border");
     };
 
-    canvas.onmousemove = function (e) {
-      if (mousedown) {
-        mousex = parseInt(e.clientX - canvasx);
-        mousey = parseInt(e.clientY - canvasy);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.beginPath();
-        ctx.moveTo(last_mousex, last_mousey);
-        ctx.lineTo(last_mousex, mousey);
-        ctx.textBaseline = "middle";
-        ctx.font = "bold 10pt Sans Serif"
-        const yDiff = mousey - last_mousey;
-        const absYDiff = Math.abs(yDiff);
-        const yTextSize = ctx.measureText(absYDiff);
-        ctx.fillStyle = "#F35E3C";
-        ctx.fillRect(last_mousex - (`${absYDiff}`.length * 10) - 3, (last_mousey + (yDiff / 2) - 5), yTextSize.width + 6, 15);
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillText(absYDiff, last_mousex - (`${absYDiff}`.length * 10), (last_mousey + (yDiff / 2)));
-        ctx.lineTo(mousex, mousey);
-        const xDiff = mousex - last_mousex;
-        const absXDiff = Math.abs(xDiff);
-        const xTextSize = ctx.measureText(absXDiff);
-        ctx.fillStyle = "#F35E3C";
-        ctx.fillRect((last_mousex + (xDiff / 2) - 3), mousey - 15, xTextSize.width + 6, 15);
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillText(absXDiff, (last_mousex + (xDiff / 2)), mousey - 10);
-        ctx.strokeStyle = '#F35E3C';
-        ctx.lineWidth = 1;
-        ctx.lineJoin = ctx.lineCap = 'round';
-        ctx.stroke();
-      }
-    };
-
-    function getRecalcPosition({ lastXPosition, xPosition, lastYPosition, yPosition }) {
-      const elemPosition = startElem.getBoundingClientRect();
-      if (lastXPosition > xPosition) {
-        lastXPosition = parseInt(elemPosition.left);
-      } else {
-        lastXPosition = parseInt(elemPosition.right);
-      }
-
-      if (lastYPosition > yPosition) {
-        lastYPosition = parseInt(elemPosition.top);
-      } else {
-        lastYPosition = parseInt(elemPosition.bottom);
-      }
-
-      return { lastXPosition, xPosition, lastYPosition, yPosition };
+    return { canvas, ctx, canvasx, canvasy };
+  })
+  .then(setupCanvasMoveEvent)
+  .catch(err => {
+    if (!/Close Hex-grid/.test(err)) {
+      console.error(err);
     }
   });
+
+function getRecalcPosition({ lastXPosition, xPosition, lastYPosition, yPosition }) {
+  const elemPosition = startElem.getBoundingClientRect();
+  if (lastXPosition > xPosition) {
+    lastXPosition = parseInt(elemPosition.left);
+  } else {
+    lastXPosition = parseInt(elemPosition.right);
+  }
+
+  if (lastYPosition > yPosition) {
+    lastYPosition = parseInt(elemPosition.top);
+  } else {
+    lastYPosition = parseInt(elemPosition.bottom);
+  }
+
+  return { lastXPosition, xPosition, lastYPosition, yPosition };
+}
