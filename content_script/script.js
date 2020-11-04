@@ -100,26 +100,6 @@ function setupVerticalRuler() {
   }).then(tasks => Promise.all(tasks));
 }
 
-function setupHorizontalEvents() {
-  return new Promise(resolve => {
-    Array.from(document.getElementsByClassName("horizontal__drag")).forEach(element => {
-      element.ondragend = handleHorizontalDrag;
-      element.onkeydown = handleKeydown;
-    });
-    resolve(true);
-  });
-}
-
-function setupVerticalEvents() {
-  return new Promise(resolve => {
-    Array.from(document.getElementsByClassName("vertical__drag")).forEach(element => {
-      element.ondragend = handleVerticalDrag;
-      element.onkeydown = handleKeydown;
-    });
-    resolve(true);
-  });
-}
-
 function handleKeydown(e) {
   const key = e.key;
   if (key === "Backspace" || key === "Delete") {
@@ -137,9 +117,9 @@ async function handleVerticalDrag(e) {
     element.draggable = true;
     element.classList.add("vertical__drag");
     element.appendChild(document.createElement("hr"));
+    element.ondragend = handleVerticalDrag;
+    element.onkeydown = handleKeydown;
     document.getElementById("grid-master").appendChild(element);
-    await Promise.all([setupHorizontalEvents(), setupVerticalEvents()])
-      .then(() => e.target.focus());
   }
 }
 
@@ -153,9 +133,9 @@ async function handleHorizontalDrag(e) {
     element.draggable = true;
     element.classList.add("horizontal__drag");
     element.appendChild(document.createElement("hr"));
+    element.ondragend = handleHorizontalDrag;
+    element.onkeydown = handleKeydown;
     document.getElementById("grid-master").appendChild(element);
-    await Promise.all([setupHorizontalEvents(), setupVerticalEvents()])
-      .then(() => e.target.focus());
   }
 }
 
