@@ -9,8 +9,7 @@
   },
   "permissions": [
     "activeTab",
-    "contextMenus",
-    "tabs"
+    "contextMenus"
   ],
   "background": {
     "scripts": [
@@ -19,12 +18,12 @@
     "persistent": false
   },
   "icons": {
-    "16": "images/horus_logo.png",
-    "32": "images/horus_logo.png",
-    "48": "images/horus_logo.png",
-    "128": "images/horus_logo.png",
-    "256": "images/horus_logo.png",
-    "512": "images/horus_logo.png"
+    "16": "images/horus_logo_w128_h128.png",
+    "32": "images/horus_logo_w128_h128.png",
+    "48": "images/horus_logo_w128_h128.png",
+    "128": "images/horus_logo_w128_h128.png",
+    "256": "images/horus_logo_w256_h256.png",
+    "512": "images/horus_logo_w512_h512.png"
   },
   "web_accessible_resources": [
     "content_script/rulers.html",
