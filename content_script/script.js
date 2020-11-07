@@ -101,17 +101,17 @@ function setupVerticalRuler() {
 }
 
 function handleKeydown(e) {
-  const key = e.key;
-  if (key === "Backspace" || key === "Delete") {
+  if (e.key === "Backspace" || e.key === "Delete") {
     e.target.remove();
   }
 }
 
-async function handleVerticalDrag(e) {
+function handleVerticalDrag(e) {
   e.target.style.left = `${Math.abs(e.clientX)}px`;
 
   if (!e.target.hasAttribute("data-moved")) {
     e.target.setAttribute("data-moved", true);
+
     const element = document.createElement("div");
     element.tabIndex = -1;
     element.draggable = true;
@@ -119,15 +119,17 @@ async function handleVerticalDrag(e) {
     element.appendChild(document.createElement("hr"));
     element.ondragend = handleVerticalDrag;
     element.onkeydown = handleKeydown;
+
     document.getElementById("grid-master").appendChild(element);
   }
 }
 
-async function handleHorizontalDrag(e) {
+function handleHorizontalDrag(e) {
   e.target.style.top = `${Math.abs(e.clientY)}px`;
 
   if (!e.target.hasAttribute("data-moved")) {
     e.target.setAttribute("data-moved", true);
+
     const element = document.createElement("div");
     element.tabIndex = -1;
     element.draggable = true;
@@ -135,6 +137,7 @@ async function handleHorizontalDrag(e) {
     element.appendChild(document.createElement("hr"));
     element.ondragend = handleHorizontalDrag;
     element.onkeydown = handleKeydown;
+
     document.getElementById("grid-master").appendChild(element);
   }
 }
@@ -185,9 +188,7 @@ Promise.all([fetch(chrome.runtime.getURL("/content_script/rulers.html")), fetch(
 
     document.body.innerHTML += html.replace("{{style}}", css);
   })
-  .then(() => {
-    return Promise.all([setupHorizontalRuler(), setupVerticalRuler()]);
-  })
+  .then(() => Promise.all([setupHorizontalRuler(), setupVerticalRuler()]))
   .then(() => {
     const horizontalElem = document.getElementById("horizontal-drag--0");
     horizontalElem.ondragend = handleHorizontalDrag;
@@ -237,7 +238,7 @@ Promise.all([fetch(chrome.runtime.getURL("/content_script/rulers.html")), fetch(
     }
   });
 
-function getRecalcPosition({ lastXPosition, xPosition, lastYPosition, yPosition }) {
+function recalcPosition({ lastXPosition, xPosition, lastYPosition, yPosition }) {
   const elemPosition = startElem.getBoundingClientRect();
   if (lastXPosition > xPosition) {
     lastXPosition = parseInt(elemPosition.left);
