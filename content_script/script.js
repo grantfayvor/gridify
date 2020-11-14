@@ -4,11 +4,15 @@ var mousedown = false;
 
 var windowWidth = window.innerWidth;
 var windowHeight = window.innerHeight;
+var canCalcDistance = true;
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   switch (message.type) {
     case "TOGGLE_GRIDS_VISIBILITY":
       await Promise.all([toggleHorizontalGrids(), toggleVerticalGrids()]);
+      break;
+    case "TOGGLE_DISTANCE_VISIBILITY":
+      canCalcDistance = !canCalcDistance;
       break;
     default:
       console.log("nothing to do.");
@@ -144,6 +148,11 @@ function handleHorizontalDrag(e) {
 
 function setupCanvasMoveEvent({ canvas, ctx, canvasx, canvasy }) {
   canvas.onmousemove = function (e) {
+    if (!canCalcDistance) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return;
+    }
+
     if (mousedown) {
       mousex = parseInt(e.clientX - canvasx);
       mousey = parseInt(e.clientY - canvasy);
@@ -210,6 +219,11 @@ Promise.all([fetch(chrome.runtime.getURL("/content_script/rulers.html")), fetch(
     defaultBodyClick = document.body.onclick;
     document.body.onclick = function (e) {
       e.preventDefault();
+      if (!canCalcDistance) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        return;
+      }
+
       if (mousedown) {
         mousedown = false;
         canvas.style.cursor = 'default';

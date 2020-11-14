@@ -11,7 +11,14 @@ chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
           "type": "normal",
           "contexts": ["all"]
         }, () => {
-          window.close();
+          chrome.contextMenus.create({
+            "id": "gridify_7890",
+            "title": "Toggle Pixel Distance Visibility",
+            "type": "normal",
+            "contexts": ["all"]
+          }, () => {
+            window.close();
+          });
         });
       });
     });
