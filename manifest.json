@@ -1,6 +1,6 @@
 {
   "name": "Hex-Grid",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "manifest_version": 2,
   "description": "Show grid lines directly on any web page and also calculate pixel distances between elements.",
   "browser_action": {

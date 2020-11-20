@@ -84,6 +84,7 @@
   height: 1px;
   margin: 0px!important;
   padding: 0px!important;
+  border: none!important;
 }
 
 .vertical__drag {
@@ -106,6 +107,7 @@
   width: 1px;
   margin: 0px!important;
   padding: 0px!important;
+  border: none!important;
 }
 
 .main__canvas {
